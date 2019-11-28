@@ -1,8 +1,7 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  div(id='mapid',style='height:180px')
+  div(id='mapid',style='height:500px')
   script(src='/javascripts/map.js')
-  p #{data}
+  p(id="lat") #{data}
+  p(id="long")
