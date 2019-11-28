@@ -8,7 +8,7 @@ map.addLayer(layer);
 var marker = L.marker([-3.717, -38.543]).addTo(map);
 marker.bindPopup("<b>Hello world!</b><br>I am a popup.");
 
-function getDataFromTTN(){
+function getData(){
 
 	//
 
