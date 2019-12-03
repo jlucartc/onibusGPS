@@ -14,7 +14,7 @@ router.get('/', function(req,res,next) {
   var data = '123';
 
 
-  var command = "curl -X GET --header 'Accept: application/json' --header 'Authorization: key ttn-account-v2.AXVZUWtEus1MMpVF8qGf8a7jQEbkU4sUA9sM3WsGkDI' 'https://bus_gps_data.data.thethingsnetwork.org/api/v2/query?last=7d'";
+  var command = "curl -X GET --header 'Accept: application/json' --header 'Authorization: key ttn-account-v2.AXVZUWtEus1MMpVF8qGf8a7jQEbkU4sUA9sM3WsGkDI' 'https://bus_gps_data.data.thethingsnetwork.org/api/v2/query?last=1d'";
 
   MongoClient.connect(url,function(err,client){
 
@@ -32,9 +32,6 @@ router.get('/', function(req,res,next) {
 	  		// transformando stdout em JSON
 	  		var data = JSON.parse(stdout);
 
-	  		// iniciando objecto da coleção de dados desejada
-	  		//var collection = db.collection('ttn_data');
-
 	  		// conta quantos dispositivos estão cadastrados no banco;
 
 	  		client.db(db).collection('ttn_data').countDocuments({},{},function(err,data){
@@ -45,67 +42,55 @@ router.get('/', function(req,res,next) {
 	  		});
 
 	  		// itera sobre todos os dados obtido e atualiza os dados do banco
-	  		console.log("comprimento: ",data.length);
-	  		for(i = 0; i < data.length; i++){
-
-	  			//console.log(data[i]);
-	  			//console.log(i);
+	  		for(var i = 0; i < data.length; i++){
 
 	  			var d = JSON.parse(JSON.stringify(data[i]));
 
-	  			// retira o campo de 'time' e 'raw' do objeto, deixando apenas o id
-	  			delete d.time;
-	  			delete d.raw;
+	  			d._id = d.device_id;
 
-	  			//console.log("Data: ",data[i]);
-	  			//console.log("d: ",d);
 
-	  			// busca o objeto apenas com base em seu id
-	  			client.db(db).collection("ttn_data").findOne(d,{},function(err,doc){
-	  				
-	  				console.log(data[i]);
-	  				console.log(err);
+	  			client.db(db).collection("ttn_data").find({_id : d._id}).toArray(function(err,docs){
 
-	  				if(err){
+	  				console.log(docs);
 
-	  					client.db(db).collection("ttn_data").insert(d,{},function(error,result){
+	  				console.log("data: ",docs[0].time);
 
-	  						console.log("Resultado: ",result);
+	  				if(docs.length == 1){
 
-	  					});
+		  				if(d.time > docs[0].time){
+
+		  					client.db(db).collection("ttn_data").update({_id : d._id},d,{},function(err,res){
+		  						console.log("Atualizando ",d._id);
+		  					});
+
+		  				}
 
 	  				}else{
 
-		  				// checa se da entrada atual é maior do que a registrada no banco
-		  				
-		  				if(data[i].time > doc.time){
+							client.db(db).collection("ttn_data").insertOne(d,{},function(err,res){console.log("Inserindo ",d._id)});
 
-		  					client.db(db).collection("ttn_data").replaceOne(doc,data[i]);
+	  				}
 
-		  				}
-		  			}
 	  			});
+
 
 	  		}
 
-	  		client.db(db).collection("ttn_data").find().forEach(function(doc){
+	  		var dispositivos = client.db(db).collection("ttn_data").find().toArray(function(err,docs){
 
-	  			console.log("Doc: ",doc);
+	  			for(var j = 0; j < docs.length; j++){
 
+	  				delete docs[j]._id;
+	  				delete docs[j].time;
+	  				docs[j].raw = new Buffer(docs[j].raw, 'base64').toString('ascii');
 
-	  		},function(err){
+	  			}
 
-	  			console.log("erro");
+	  			res.render('index', { title: 'Express' , data: JSON.stringify(docs) });
 
 	  		});
 
-	  		console.log("raw: ",data[data.length-1]);
-
-	  		var raw = data[data.length-1].raw.split("/");
-
-	  		console.log("Dado: "+raw);
-
-	  		res.render('index', { title: 'Express' , data: raw });
+	  		
 
 	  	} 
 
