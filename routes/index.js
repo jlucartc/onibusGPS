@@ -33,6 +33,10 @@ router.get('/', function(req,res,next) {
 	  		var data = JSON.parse(stdout);
 
 	  		// conta quantos dispositivos estão cadastrados no banco;
+	  		client.db(db).collection('ttn_data').updateMany({},{status:0},{},function(err,res){
+	  			if(err){}else{console.log(res.message);}
+	  		});
+
 
 	  		client.db(db).collection('ttn_data').countDocuments({},{},function(err,data){
 
@@ -47,13 +51,14 @@ router.get('/', function(req,res,next) {
 	  			var d = JSON.parse(JSON.stringify(data[i]));
 
 	  			d._id = d.device_id;
+	  			d.status = 1;
 
 
 	  			client.db(db).collection("ttn_data").find({_id : d._id}).toArray(function(err,docs){
 
 	  				console.log(docs);
 
-	  				console.log("data: ",docs[0].time);
+	  				//console.log("data: ",docs[0].time);
 
 	  				if(docs.length == 1){
 
@@ -70,6 +75,7 @@ router.get('/', function(req,res,next) {
 							client.db(db).collection("ttn_data").insertOne(d,{},function(err,res){console.log("Inserindo ",d._id)});
 
 	  				}
+
 
 	  			});
 

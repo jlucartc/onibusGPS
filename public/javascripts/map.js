@@ -1,3 +1,10 @@
+
+var data = document.getElementById("lat").innerHTML;
+
+console.log(data);
+
+
+
 var layer = new L.StamenTileLayer("toner");
 var map = new L.Map("mapid", {
     center: new L.LatLng(-3.7172200, -38.5430600),
