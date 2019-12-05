@@ -1,9 +1,9 @@
 var express = require('express');
 const http = require('http');
 const cp = require("child_process");
-var MongoClient = require('mongodb').MongoClient;
+//var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017";
-const assert = require('assert');
+//const assert = require('assert');
 
 
 var router = express.Router();
@@ -30,71 +30,39 @@ router.get('/', function(req,res,next) {
 	  	}else{
 
 	  		// transformando stdout em JSON
-	  		var data = JSON.parse(stdout);
+	  		var data = JSON.parse(stdout).reverse();
 
 	  		// conta quantos dispositivos estão cadastrados no banco;
-	  		client.db(db).collection('ttn_data').updateMany({},{status:0},{},function(err,res){
-	  			if(err){}else{console.log(res.message);}
-	  		});
 
 
-	  		client.db(db).collection('ttn_data').countDocuments({},{},function(err,data){
+	  		/*client.db(db).collection('ttn_data').countDocuments({},{},function(err,data){
 
 	  			if(err) throw err;
 	  			console.log("Quantidade de dispositivos registrados: ",data);
 
-	  		});
+	  		});*/
 
-	  		// itera sobre todos os dados obtido e atualiza os dados do banco
+	  		console.log(data);
+
+	  		var dispositivos = new Array();
+	  		var ids = new Array();
+
 	  		for(var i = 0; i < data.length; i++){
 
-	  			var d = JSON.parse(JSON.stringify(data[i]));
+	  			if(ids.indexOf(data[i].device_id) < 0){
 
-	  			d._id = d.device_id;
-	  			d.status = 1;
-
-
-	  			client.db(db).collection("ttn_data").find({_id : d._id}).toArray(function(err,docs){
-
-	  				console.log(docs);
-
-	  				//console.log("data: ",docs[0].time);
-
-	  				if(docs.length == 1){
-
-		  				if(d.time > docs[0].time){
-
-		  					client.db(db).collection("ttn_data").update({_id : d._id},d,{},function(err,res){
-		  						console.log("Atualizando ",d._id);
-		  					});
-
-		  				}
-
-	  				}else{
-
-							client.db(db).collection("ttn_data").insertOne(d,{},function(err,res){console.log("Inserindo ",d._id)});
-
-	  				}
-
-
-	  			});
-
-
-	  		}
-
-	  		var dispositivos = client.db(db).collection("ttn_data").find().toArray(function(err,docs){
-
-	  			for(var j = 0; j < docs.length; j++){
-
-	  				delete docs[j]._id;
-	  				delete docs[j].time;
-	  				docs[j].raw = new Buffer(docs[j].raw, 'base64').toString('ascii');
+	  				ids.push(data[i].device_id);
+	  				data[i].raw = new Buffer(JSON.parse(JSON.stringify(data[i].raw)),'base64').toString('ascii');
+	  				dispositivos.push(data[i])
+	  				console.log("Data:",data[i]);
 
 	  			}
 
-	  			res.render('index', { title: 'Express' , data: JSON.stringify(docs) });
+	  		}
 
-	  		});
+	  		// itera sobre todos os dados obtido e atualiza os dados do banco
+
+	  		res.render('index', { title: 'Ônibus GPS' , data: JSON.stringify(dispositivos) });
 
 	  		
 
@@ -103,30 +71,6 @@ router.get('/', function(req,res,next) {
   	});
 
   });
-
-  /*cp.exec(command,function(err,stdout,stderr){
-  	
-  	if(err){ 
-
-  		console.log('error');
-
-  	}else{
-
-  		console.log("Tipo: "+typeof(stdout));
-
-  		var data = JSON.parse(stdout);
-
-  		var raw = data[data.length-1].raw.split("/");
-
-  		console.log("Dado: "+raw);
-
-  		res.render('index', { title: 'Express' , data: raw });
-
-  	} 
-  
-  });*/
-
-  
 
 });
 
