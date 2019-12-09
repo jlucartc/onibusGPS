@@ -16,11 +16,11 @@ router.get('/', function(req,res,next) {
 
   var command = "curl -X GET --header 'Accept: application/json' --header 'Authorization: key ttn-account-v2.AXVZUWtEus1MMpVF8qGf8a7jQEbkU4sUA9sM3WsGkDI' 'https://bus_gps_data.data.thethingsnetwork.org/api/v2/query?last=1d'";
 
-  MongoClient.connect(url,function(err,client){
+  //MongoClient.connect(url,function(err,client){
 
   	var db = "onibus_gps_db";
 
-  	if (err) throw err; 
+  	//if (err) throw err; 
   	cp.exec(command,function(err,stdout,stderr){
 
 	  	if(err){ 
@@ -70,7 +70,7 @@ router.get('/', function(req,res,next) {
 
   	});
 
-  });
+  //});
 
 });
 
