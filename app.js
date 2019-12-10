@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const cp = require("child_process");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -19,31 +20,68 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+//var router = express.Router();
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+app.get('/', function(req,res,next) {
+
+  var data;
+  var command = "cat storageData.txt";
+  console.log(command);
+
+    cp.exec(command,function(err,stdout,stderr){
+
+      if(err){ 
+
+        console.log('error');
+
+      }else{
+
+        var data = JSON.parse(stdout).reverse();
+
+        var reducedData = new Array();
+
+        for(var i = 0; i < data.length; i++){
+
+            data[i].raw = new Buffer(JSON.parse(JSON.stringify(data[i].raw)),'base64').toString('ascii');
+            //reducedData.push({device_id: data[i].device_id, raw: data[i].raw});
+
+            var control = 0;
+
+            for(var j = 0; j < reducedData.length; j++){
+
+              if(reducedData[j].raw == data[i].raw){
+
+                control = 1;
+                break;
+              
+              }
+
+            }
+
+            if(control == 0){
+
+              reducedData.push({device_id:data[i].device_id, raw:data[i].raw, time:data[i].time});
+
+            }
+
+            //data[i].payload_raw = new Buffer(JSON.parse(JSON.stringify(data[i].payload_raw)),'base64').toString('ascii');
+            //reducedData.push({device_id: data[i].dev_id, raw: data[i].payload_raw});
+
+        }
+
+
+      }
+
+      res.render('index', { title: 'Ônibus GPS' , data: JSON.stringify(reducedData) });
+
+    }); 
+
+
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+app.listen(3000,function () {
+  console.log('Example app listening on port 3000!');
 });
-
-var server = app.listen(8081, function () {
-   var host = server.address().address
-   var port = server.address().port
-   
-   console.log("Example app listening at http://%s:%s", host, port)
-})
 
 
 

@@ -13,12 +13,13 @@ map.addLayer(layer);
 
 for(var i = 0; i < data.length; i++){
 
-	var coords = data[i].raw.split(";");
-	console.log(coords[1].substring(0,coords[1].length-1));
-	coords[1] = coords[1].substring(0,coords[1].length-1);
-	var marker = L.marker([parseFloat(coords[0]),parseFloat(coords[1])]).addTo(map);
-	marker.bindPopup("<h3>"+data[i].device_id+"</h3><br><h5>"+coords[0]+","+coords[1]+"</h5>");
-
+	var coords = data[i].raw.trim().split(";");
+	if(!isNaN(data[i].raw.trim()[1])){
+		coords[1] = coords[1].substring(0,coords[1].length-1);
+		var marker = L.marker([parseFloat(coords[0]),parseFloat(coords[1])]).addTo(map);
+		marker.bindPopup("<h3>"+data[i].device_id+"</h3><br><h5>"+coords[0]+","+coords[1]+"</h5>");
+		console.log("ponto "+i+"adicionado");
+	}
 }
 
 //var marker = L.marker([-3.717, -38.543]).addTo(map);

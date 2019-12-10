@@ -14,13 +14,10 @@ router.get('/', function(req,res,next) {
   var data = '123';
 
 
-  var command = "curl -X GET --header 'Accept: application/json' --header 'Authorization: key ttn-account-v2.AXVZUWtEus1MMpVF8qGf8a7jQEbkU4sUA9sM3WsGkDI' 'https://bus_gps_data.data.thethingsnetwork.org/api/v2/query?last=1d'";
-
-  //MongoClient.connect(url,function(err,client){
+  var command = "cat ~/Desktop/output20191210.txt";
 
   	var db = "onibus_gps_db";
 
-  	//if (err) throw err; 
   	cp.exec(command,function(err,stdout,stderr){
 
 	  	if(err){ 
@@ -29,21 +26,7 @@ router.get('/', function(req,res,next) {
 
 	  	}else{
 
-	  		// transformando stdout em JSON
 	  		var data = JSON.parse(stdout).reverse();
-
-	  		// conta quantos dispositivos estão cadastrados no banco;
-
-
-	  		/*client.db(db).collection('ttn_data').countDocuments({},{},function(err,data){
-
-	  			if(err) throw err;
-	  			console.log("Quantidade de dispositivos registrados: ",data);
-
-	  		});*/
-
-	  		console.log(data);
-
 	  		var dispositivos = new Array();
 	  		var ids = new Array();
 
@@ -60,17 +43,11 @@ router.get('/', function(req,res,next) {
 
 	  		}
 
-	  		// itera sobre todos os dados obtido e atualiza os dados do banco
-
 	  		res.render('index', { title: 'Ônibus GPS' , data: JSON.stringify(dispositivos) });
-
-	  		
 
 	  	} 
 
   	});
-
-  //});
 
 });
 
