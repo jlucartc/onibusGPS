@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function(req,res,next) {
 
   var data;
-  var command = "cat storageData.txt";
+  var command = "cat data/output20191210-copia.txt";
   console.log(command);
 
     cp.exec(command,function(err,stdout,stderr){
@@ -42,14 +42,13 @@ app.get('/', function(req,res,next) {
 
         for(var i = 0; i < data.length; i++){
 
-            data[i].raw = new Buffer(JSON.parse(JSON.stringify(data[i].raw)),'base64').toString('ascii');
-            //reducedData.push({device_id: data[i].device_id, raw: data[i].raw});
+            data[i].payload_raw = new Buffer(JSON.parse(JSON.stringify(data[i].payload_raw)),'base64').toString('ascii');
 
-            var control = 0;
+            /*var control = 0;
 
             for(var j = 0; j < reducedData.length; j++){
 
-              if(reducedData[j].raw == data[i].raw){
+              if(reducedData[j].payload_raw == data[i].payload_raw){
 
                 control = 1;
                 break;
@@ -58,14 +57,12 @@ app.get('/', function(req,res,next) {
 
             }
 
-            if(control == 0){
+            if(control == 0){*/
 
-              reducedData.push({device_id:data[i].device_id, raw:data[i].raw, time:data[i].time});
+            reducedData.push({device_id:data[i].dev_id, raw:data[i].payload_raw, time:data[i].metadata.time});
 
-            }
+            //}
 
-            //data[i].payload_raw = new Buffer(JSON.parse(JSON.stringify(data[i].payload_raw)),'base64').toString('ascii');
-            //reducedData.push({device_id: data[i].dev_id, raw: data[i].payload_raw});
 
         }
 
