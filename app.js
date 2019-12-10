@@ -4,10 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cp = require("child_process");
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-
 var app = express();
 
 // view engine setup
@@ -20,12 +16,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//var router = express.Router();
-
 app.get('/', function(req,res,next) {
 
   var data;
-  var command = "cat data/output20191210-copia.txt";
+  var command = "curl -X GET --header 'Accept: application/json' --header 'Authorization: key ttn-account-v2.AXVZUWtEus1MMpVF8qGf8a7jQEbkU4sUA9sM3WsGkDI' 'https://bus_gps_data.data.thethingsnetwork.org/api/v2/query?last=12h'";
   console.log(command);
 
     cp.exec(command,function(err,stdout,stderr){
@@ -38,38 +32,27 @@ app.get('/', function(req,res,next) {
 
         var data = JSON.parse(stdout).reverse();
 
+        var uniqueIds = new Array();
+
         var reducedData = new Array();
 
         for(var i = 0; i < data.length; i++){
 
-            data[i].payload_raw = new Buffer(JSON.parse(JSON.stringify(data[i].payload_raw)),'base64').toString('ascii');
+            if(uniqueIds.indexOf(data[i].device_id) < 0){
 
-            /*var control = 0;
+              data[i].raw = new Buffer(JSON.parse(JSON.stringify(data[i].raw)),'base64').toString('ascii');
 
-            for(var j = 0; j < reducedData.length; j++){
+              reducedData.push(data[i]);
 
-              if(reducedData[j].payload_raw == data[i].payload_raw){
-
-                control = 1;
-                break;
-              
-              }
+              uniqueIds.push(data[i].device_id);
 
             }
 
-            if(control == 0){*/
-
-            reducedData.push({device_id:data[i].dev_id, raw:data[i].payload_raw, time:data[i].metadata.time});
-
-            //}
-
-
         }
 
+        res.render('index', { title: 'Ônibus GPS' , data: JSON.stringify(reducedData) });
 
       }
-
-      res.render('index', { title: 'Ônibus GPS' , data: JSON.stringify(reducedData) });
 
     }); 
 
